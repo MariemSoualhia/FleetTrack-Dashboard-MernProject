@@ -1,0 +1,2 @@
+# FleetTrack-Dashboard-MernProject
+ FleetPulse is a web-based analytics dashboard designed for trucking companies to monitor and optimize fleet performance. The platform provides real-time insights on fuel usage, trip efficiency, delivery delays, and allows automatic report generation and export. Built using the MERN Stack (MongoDB, Express.js, React, Node.js), FleetPulse empowers managers, supervisors, and owners with actionable data to improve operations.
