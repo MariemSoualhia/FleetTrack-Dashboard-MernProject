@@ -11,9 +11,10 @@ exports.createReport = async (req, res) => {
 };
 
 // 📖 Get all reports
+
 exports.getReports = async (req, res) => {
   try {
-    const reports = await Report.find();
+    const reports = await Report.find().populate("generatedByUserId", "email"); // ➡️ seulement l'email
     res.json(reports);
   } catch (error) {
     res.status(500).json({ message: error.message });

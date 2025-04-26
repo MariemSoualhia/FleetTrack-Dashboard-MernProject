@@ -7,7 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const truckRoutes = require("./routes/truckRoutes");
 const tripRoutes = require("./routes/tripRoutes");
-
+const { scheduleMaintenanceCheck } = require("./cron/maintenanceCheck");
 dotenv.config();
 connectDB();
 
@@ -28,6 +28,9 @@ app.use("/api/alerts", alertRoutes);
 const kpiRoutes = require("./routes/kpiRoutes");
 
 app.use("/api/kpis", kpiRoutes);
+
+// ➡️ Démarrer le cron job
+scheduleMaintenanceCheck();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

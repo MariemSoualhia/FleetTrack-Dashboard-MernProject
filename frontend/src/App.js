@@ -11,6 +11,13 @@ import DashboardPage from "./pages/DashboardPage";
 import DriversPage from "./pages/DriversPage";
 import DashboardLayout from "./components/DashboardLayout";
 import TrucksPage from "./pages/TrucksPage";
+import TripsPage from "./pages/TripsPage";
+import KpisPage from "./pages/KpisPage";
+import AlertsPage from "./pages/AlertsPage";
+import AlertsAnalyticsPage from "./pages/AlertsAnalyticsPage";
+import ReportsPage from "./pages/ReportsPage";
+import ReportsHistoryPage from "./pages/ReportsHistoryPage";
+
 function App() {
   const { user, loading } = useAuth();
 
@@ -34,6 +41,13 @@ function App() {
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="drivers" element={<DriversPage />} />
             <Route path="Trucks" element={<TrucksPage />} />
+            <Route path="trips" element={<TripsPage />} />
+            <Route path="kpis" element={<KpisPage />} />
+            <Route path="alerts" element={<AlertsPage />} />
+            <Route path="alerts-analytics" element={<AlertsAnalyticsPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="/reports-history" element={<ReportsHistoryPage />} />
+
             {/* autres routes */}
           </Route>
         )}

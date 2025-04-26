@@ -69,10 +69,23 @@ function Sidebar() {
       roles: ["supervisor", "manager"],
     },
     {
+      key: "alerts-analytics",
+      icon: <AlertOutlined />,
+      label: "Alerts Analytics",
+      roles: ["manager", "supervisor"],
+    },
+
+    {
       key: "reports",
       icon: <FileSearchOutlined />,
       label: "Reports",
       roles: ["manager", "companyOwner"],
+    },
+    {
+      key: "reports-history",
+      icon: <FileSearchOutlined />,
+      label: "Reports History",
+      roles: ["manager", "supervisor"],
     },
     {
       key: "kpis",

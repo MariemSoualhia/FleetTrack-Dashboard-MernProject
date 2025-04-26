@@ -6,15 +6,15 @@ const alertController = require("../controllers/alertController");
 
 router.post(
   "/",
-  protect,
-  authorizeRoles("manager", "supervisor"),
+  // protect,
+  // authorizeRoles("manager", "supervisor"),
   alertController.createAlert
 );
-router.get("/", protect, alertController.getAlerts);
+router.get("/", alertController.getAlerts);
 router.put(
   "/:id/resolve",
-  protect,
-  authorizeRoles("manager", "supervisor"),
+  // protect,
+  // authorizeRoles("manager", "supervisor"),
   alertController.resolveAlert
 );
 

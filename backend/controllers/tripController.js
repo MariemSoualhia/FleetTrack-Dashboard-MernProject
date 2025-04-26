@@ -1,15 +1,34 @@
 const Trip = require("../models/Trip");
+const Alert = require("../models/Alert"); // ⚡ importer Alert
 
 // ➕ Create Trip
 exports.createTrip = async (req, res) => {
   try {
     const trip = await Trip.create(req.body);
+
+    // Vérification automatique pour création d'alertes
+    if (trip.fuelUsed > 100) {
+      // 🛢️ par exemple
+      await Alert.create({
+        type: "fuelOverconsumption",
+        relatedTripId: trip._id,
+        message: `Truck used too much fuel (${trip.fuelUsed}L).`,
+      });
+    }
+
+    if (trip.deliveryStatus === "delayed") {
+      await Alert.create({
+        type: "excessiveDelay",
+        relatedTripId: trip._id,
+        message: "Delivery was delayed.",
+      });
+    }
+
     res.status(201).json(trip);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
-
 // 📖 Get all Trips
 exports.getTrips = async (req, res) => {
   try {
