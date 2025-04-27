@@ -23,7 +23,7 @@ const createReportEntry = async (
     await axios.post(
       "http://localhost:5000/api/reports",
       {
-        generatedByUserId: user.id || user._id,
+        generatedByUserId: user.user._id,
         reportType,
         reportName,
         fileType,
