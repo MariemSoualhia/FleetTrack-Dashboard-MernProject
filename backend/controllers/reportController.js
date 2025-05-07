@@ -12,9 +12,25 @@ exports.createReport = async (req, res) => {
 
 // 📖 Get all reports
 
+// GET /api/reports?type=trips&from=2024-07-01&to=2024-07-15
 exports.getReports = async (req, res) => {
   try {
-    const reports = await Report.find().populate("generatedByUserId", "email"); // ➡️ seulement l'email
+    const { type, from, to } = req.query;
+    const query = {};
+
+    if (type) {
+      query.reportType = type;
+    }
+
+    if (from && to) {
+      query.reportPeriodStart = { $gte: new Date(from) };
+      query.reportPeriodEnd = { $lte: new Date(to) };
+    }
+
+    const reports = await Report.find(query).populate(
+      "generatedByUserId",
+      "name email"
+    );
     res.json(reports);
   } catch (error) {
     res.status(500).json({ message: error.message });

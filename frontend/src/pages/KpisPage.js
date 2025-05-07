@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import { motion } from "framer-motion"; // 💥 Ajout animation
+import { motion } from "framer-motion";
 
 ChartJS.register(
   ArcElement,
@@ -66,6 +66,11 @@ function KpisPage() {
     );
   }
 
+  const avgDistancePerTrip =
+    kpis.totalTrips > 0
+      ? (kpis.totalDistanceDriven / kpis.totalTrips).toFixed(2)
+      : 0;
+
   const trucksData = {
     labels: ["Available Trucks", "In Maintenance"],
     datasets: [
@@ -107,10 +112,32 @@ function KpisPage() {
     },
   };
 
-  // 🔥 Animation variante pour Card
   const cardVariants = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
+  };
+  const reportTypeCounts = {
+    custom: 0,
+    daily: 0,
+    weekly: 0,
+  };
+
+  kpis.reportsByType.forEach((r) => {
+    reportTypeCounts[r._id] = r.count;
+  });
+
+  const reportPieData = {
+    labels: ["Custom", "Daily", "Weekly"],
+    datasets: [
+      {
+        data: [
+          reportTypeCounts.custom,
+          reportTypeCounts.daily,
+          reportTypeCounts.weekly,
+        ],
+        backgroundColor: ["#722ed1", "#1890ff", "#faad14"],
+      },
+    ],
   };
 
   return (
@@ -121,7 +148,6 @@ function KpisPage() {
         Fleet Overview KPIs
       </h2>
 
-      {/* Cards Section */}
       <Row gutter={[16, 16]} justify="center">
         <Col xs={24} sm={8}>
           <motion.div
@@ -150,6 +176,7 @@ function KpisPage() {
             </Card>
           </motion.div>
         </Col>
+
         <Col xs={24} sm={8}>
           <motion.div
             variants={cardVariants}
@@ -177,6 +204,7 @@ function KpisPage() {
             </Card>
           </motion.div>
         </Col>
+
         <Col xs={24} sm={8}>
           <motion.div
             variants={cardVariants}
@@ -206,7 +234,6 @@ function KpisPage() {
         </Col>
       </Row>
 
-      {/* Charts Section */}
       <Row gutter={[16, 16]} style={{ marginTop: "40px" }} justify="center">
         <Col xs={24} md={6}>
           <motion.div
@@ -262,6 +289,34 @@ function KpisPage() {
             animate="visible"
           >
             <Card
+              title="Avg Distance per Trip"
+              style={{
+                borderRadius: "12px",
+                height: "400px",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{
+                  marginTop: "140px",
+                  fontSize: "26px",
+                  fontWeight: "bold",
+                  color: "#13c2c2",
+                }}
+              >
+                {avgDistancePerTrip} km
+              </div>
+            </Card>
+          </motion.div>
+        </Col>
+
+        <Col xs={24} md={6}>
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Card
               title="Trucks Status"
               style={{ borderRadius: "12px", height: "400px" }}
             >
@@ -284,9 +339,49 @@ function KpisPage() {
             </Card>
           </motion.div>
         </Col>
+        <Col xs={24} sm={8}>
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Card
+              bordered={false}
+              style={{
+                textAlign: "center",
+                borderRadius: "12px",
+                height: "120px",
+              }}
+            >
+              <h3>Total Reports</h3>
+              <h1
+                style={{
+                  marginTop: "10px",
+                  fontSize: "28px",
+                  color: "#eb2f96",
+                }}
+              >
+                {kpis.totalReports}
+              </h1>
+            </Card>
+          </motion.div>
+        </Col>
+        <Col xs={24} md={6}>
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Card
+              title="Reports by Type"
+              style={{ borderRadius: "12px", height: "400px" }}
+            >
+              <Pie data={reportPieData} height={300} />
+            </Card>
+          </motion.div>
+        </Col>
       </Row>
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

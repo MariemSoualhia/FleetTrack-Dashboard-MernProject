@@ -7,6 +7,10 @@ const generateToken = (user) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      phone: user.phone,
+      company: user.company,
+      position: user.position,
+      profileImage: user.profileImage,
     },
     process.env.JWT_SECRET,
     { expiresIn: "30d" }

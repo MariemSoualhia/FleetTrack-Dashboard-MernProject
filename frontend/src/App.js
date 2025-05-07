@@ -17,6 +17,8 @@ import AlertsPage from "./pages/AlertsPage";
 import AlertsAnalyticsPage from "./pages/AlertsAnalyticsPage";
 import ReportsPage from "./pages/ReportsPage";
 import ReportsHistoryPage from "./pages/ReportsHistoryPage";
+import ProfilePage from "./pages/ProfilePage";
+import ApproveUsersPage from "./pages/ApproveUsersPage";
 
 function App() {
   const { user, loading } = useAuth();
@@ -47,6 +49,8 @@ function App() {
             <Route path="alerts-analytics" element={<AlertsAnalyticsPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="/reports-history" element={<ReportsHistoryPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/admin/users" element={<ApproveUsersPage />} />
 
             {/* autres routes */}
           </Route>

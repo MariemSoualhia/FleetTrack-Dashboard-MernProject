@@ -2,26 +2,45 @@ import { useEffect, useState } from "react";
 import { Table, Button, Spin, Tag } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { Form, Select, DatePicker } from "antd";
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 function ReportsHistoryPage() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchReports = async () => {
+  const fetchReports = async (filters = {}) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
 
       const res = await axios.get("http://localhost:5000/api/reports", {
         headers: { Authorization: `Bearer ${token}` },
+        params: filters,
       });
 
       setReports(res.data);
     } catch (error) {
-      console.error("Error fetching reports:", error);
+      console.error("Error loading reports:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFilter = (values) => {
+    const filters = {};
+
+    if (values.type) {
+      filters.type = values.type;
+    }
+
+    if (values.dateRange) {
+      filters.from = values.dateRange[0].startOf("day").toISOString();
+      filters.to = values.dateRange[1].endOf("day").toISOString();
+    }
+
+    fetchReports(filters);
   };
 
   useEffect(() => {
@@ -105,6 +124,27 @@ function ReportsHistoryPage() {
       >
         Reports History
       </h2>
+      <Form layout="inline" onFinish={handleFilter}>
+        <Form.Item name="type" label="Type">
+          <Select placeholder="Select report type" style={{ width: 180 }}>
+            <Option value="trips">Trips</Option>
+            <Option value="alerts">Alerts</Option>
+            <Option value="daily">Daily</Option>
+            <Option value="weekly">Weekly</Option>
+            <Option value="custom">Custom</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item name="dateRange" label="Period">
+          <RangePicker />
+        </Form.Item>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Filter
+          </Button>
+        </Form.Item>
+      </Form>
 
       <Table
         columns={columns}

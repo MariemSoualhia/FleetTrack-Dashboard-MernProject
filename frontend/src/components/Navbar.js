@@ -49,6 +49,15 @@ function Navbar() {
         <span style={{ marginRight: 16 }}>
           👋 Hello, <b>{user?.name || user?.email || "User"}</b>
         </span>
+
+        <Button
+          style={{ marginRight: 8 }}
+          type="default"
+          onClick={() => navigate("/profile")}
+        >
+          Profile
+        </Button>
+
         <Button onClick={handleLogout} type="primary" danger>
           Logout
         </Button>

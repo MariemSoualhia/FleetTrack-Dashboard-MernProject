@@ -1,7 +1,7 @@
 const Driver = require("../models/Driver");
 const Truck = require("../models/Truck");
 const Trip = require("../models/Trip");
-
+const Report = require("../models/Report");
 // 📊 Get overall KPIs
 exports.getOverview = async (req, res) => {
   try {
@@ -45,7 +45,15 @@ exports.getOverview = async (req, res) => {
       },
       { $sort: { _id: 1 } },
     ]);
-
+    const totalReports = await Report.countDocuments();
+    const reportsByType = await Report.aggregate([
+      {
+        $group: {
+          _id: "$reportType",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
     res.json({
       totalDrivers,
       totalTrucks,
@@ -56,6 +64,8 @@ exports.getOverview = async (req, res) => {
       delayedTrips,
       totalDistanceDriven, // ✅ Important à ajouter ici
       tripsPerDay,
+      totalReports,
+      reportsByType,
     });
   } catch (error) {
     console.error(error);

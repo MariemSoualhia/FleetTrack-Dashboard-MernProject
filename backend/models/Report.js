@@ -9,9 +9,10 @@ const reportSchema = new mongoose.Schema(
     },
     reportType: {
       type: String,
-      enum: ["daily", "weekly", "custom"],
+      enum: ["daily", "weekly", "custom", "trips", "alerts", "summary"], // ✅ ajoute les vrais types que tu veux utiliser
       required: true,
     },
+
     reportPeriodStart: {
       type: Date,
       required: true,

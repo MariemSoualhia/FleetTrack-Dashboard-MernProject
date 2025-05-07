@@ -7,6 +7,8 @@ const authRoutes = require("./routes/authRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const truckRoutes = require("./routes/truckRoutes");
 const tripRoutes = require("./routes/tripRoutes");
+const userRoutes = require("./routes/userRoutes");
+
 const { scheduleMaintenanceCheck } = require("./cron/maintenanceCheck");
 dotenv.config();
 connectDB();
@@ -28,6 +30,11 @@ app.use("/api/alerts", alertRoutes);
 const kpiRoutes = require("./routes/kpiRoutes");
 
 app.use("/api/kpis", kpiRoutes);
+app.use("/api/users", userRoutes);
+const path = require("path");
+
+// Serve uploaded images statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ➡️ Démarrer le cron job
 scheduleMaintenanceCheck();

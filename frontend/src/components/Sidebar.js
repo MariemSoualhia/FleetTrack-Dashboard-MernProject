@@ -93,6 +93,12 @@ function Sidebar() {
       label: "KPIs",
       roles: ["supervisor", "manager"],
     },
+    {
+      key: "admin/users",
+      icon: <TeamOutlined />,
+      label: "Approve Users",
+      roles: ["manager"],
+    },
   ];
 
   const filteredItems = allMenuItems

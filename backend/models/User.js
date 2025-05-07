@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-
+const defimg = "profil1.png";
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -11,10 +11,14 @@ const userSchema = new mongoose.Schema(
       enum: ["manager", "logisticsOperator", "companyOwner", "supervisor"],
       required: true,
     },
+    phone: { type: String },
+    company: { type: String },
+    position: { type: String },
+    isApproved: { type: Boolean, default: false },
+    profileImage: { type: String, default: defimg },
   },
   { timestamps: true }
 );
-
 // Crypter le mot de passe avant sauvegarde
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) next();
