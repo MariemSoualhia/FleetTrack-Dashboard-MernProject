@@ -9,6 +9,7 @@ const {
   changePassword,
   updateProfileImage,
   approveUser,
+  forgotPassword,
 } = require("../controllers/userController");
 const { protect } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadMiddleware");
@@ -29,5 +30,6 @@ router.put(
   updateProfileImage
 );
 router.put("/:id/approve", protect, approveUser);
+router.post("/forgot-password", forgotPassword);
 
 module.exports = router;

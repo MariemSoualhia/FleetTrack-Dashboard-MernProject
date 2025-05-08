@@ -13,13 +13,16 @@ function DriversPage() {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingDriver, setEditingDriver] = useState(null); // 🔥 Pour l'édition
+  const [editingDriver, setEditingDriver] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
 
+  const [searchName, setSearchName] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
   const { user } = useAuth();
-  const [form] = Form.useForm(); // Form instance for editing
+  const [form] = Form.useForm();
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
@@ -46,10 +49,8 @@ function DriversPage() {
 
   const onFinish = async (values) => {
     const token = localStorage.getItem("token");
-
     try {
       if (editingDriver) {
-        // 🔥 Update driver
         await axios.put(
           `http://localhost:5000/api/drivers/${editingDriver._id}`,
           values,
@@ -58,14 +59,12 @@ function DriversPage() {
         setAlertSeverity("success");
         setAlertMessage("Driver updated successfully!");
       } else {
-        // 🔥 Add driver
         await axios.post("http://localhost:5000/api/drivers", values, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setAlertSeverity("success");
         setAlertMessage("Driver added successfully!");
       }
-
       setSnackbarOpen(true);
       setIsModalOpen(false);
       fetchDrivers();
@@ -110,81 +109,118 @@ function DriversPage() {
     }
   };
 
-  const columns = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "License Number",
-      dataIndex: "licenseNumber",
-      key: "licenseNumber",
-    },
-    {
-      title: "Hire Date",
-      dataIndex: "hireDate",
-      key: "hireDate",
-      render: (date) => new Date(date).toLocaleDateString(),
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (status === "active" ? "Active" : "Inactive"),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure to delete this driver?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </>
-      ),
-    },
-  ];
-
   return (
     <div style={{ padding: "24px" }}>
       <h2>Drivers Management</h2>
 
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        style={{ marginBottom: "16px" }}
-        onClick={() => {
-          setEditingDriver(null);
-          form.resetFields();
-          setIsModalOpen(true);
+      {/* 🔍 Filtres */}
+      <div
+        style={{
+          marginBottom: "16px",
+          display: "flex",
+          alignItems: "flex-end",
+          flexWrap: "wrap",
+          gap: "24px",
         }}
       >
-        Add Driver
-      </Button>
+        <div>
+          <label style={{ fontWeight: "500" }}>Search by name</label>
+          <Input
+            placeholder="e.g. ali"
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            style={{ width: 200 }}
+          />
+        </div>
 
+        <div>
+          <label style={{ fontWeight: "500" }}>Filter by status</label>
+          <Select
+            placeholder="Select status"
+            value={filterStatus}
+            onChange={(value) => setFilterStatus(value)}
+            allowClear
+            style={{ width: 200 }}
+          >
+            <Option value="active">Active</Option>
+            <Option value="inactive">Inactive</Option>
+          </Select>
+        </div>
+
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setEditingDriver(null);
+            form.resetFields();
+            setIsModalOpen(true);
+          }}
+        >
+          Add Driver
+        </Button>
+      </div>
+
+      {/* 📋 Tableau */}
       <Table
-        columns={columns}
-        dataSource={drivers}
+        columns={[
+          {
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
+          },
+          {
+            title: "License Number",
+            dataIndex: "licenseNumber",
+            key: "licenseNumber",
+          },
+          {
+            title: "Hire Date",
+            dataIndex: "hireDate",
+            key: "hireDate",
+            render: (date) => new Date(date).toLocaleDateString(),
+          },
+          {
+            title: "Status",
+            dataIndex: "status",
+            key: "status",
+            render: (status) => (status === "active" ? "Active" : "Inactive"),
+          },
+          {
+            title: "Actions",
+            key: "actions",
+            render: (_, record) => (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEdit(record)}
+                />
+                <Popconfirm
+                  title="Are you sure to delete this driver?"
+                  onConfirm={() => handleDelete(record._id)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button type="text" danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </div>
+            ),
+          },
+        ]}
+        dataSource={drivers.filter((driver) => {
+          const nameMatch = driver.name
+            .toLowerCase()
+            .includes(searchName.toLowerCase());
+          const statusMatch = filterStatus
+            ? driver.status === filterStatus
+            : true;
+          return nameMatch && statusMatch;
+        })}
         loading={loading}
         rowKey="_id"
       />
 
-      {/* Modal Form for Add/Edit Driver */}
+      {/* ➕ / ✏️ Modal */}
       <Modal
         title={editingDriver ? "Edit Driver" : "Add Driver"}
         open={isModalOpen}
@@ -231,7 +267,7 @@ function DriversPage() {
         </Form>
       </Modal>
 
-      {/* Snackbar Notifications */}
+      {/* ✅ Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

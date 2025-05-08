@@ -129,3 +129,43 @@ exports.approveUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+const nodemailer = require("nodemailer");
+
+// 📧 Forgot Password
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user)
+      return res
+        .status(404)
+        .json({ message: "User with this email not found" });
+
+    // Générer un mot de passe temporaire
+    const tempPassword = Math.random().toString(36).slice(-8);
+    user.password = tempPassword;
+    await user.save();
+
+    // Configurer l’envoi de mail
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "your-email@gmail.com",
+        pass: "your-app-password", // ⚠️ Utilise un mot de passe d'application Gmail
+      },
+    });
+
+    const mailOptions = {
+      from: "FleetPulse <your-email@gmail.com>",
+      to: email,
+      subject: "FleetPulse - Temporary Password",
+      text: `Hello ${user.name},\n\nHere is your temporary password: ${tempPassword}\nPlease log in and change it immediately.\n\nFleetPulse Team`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ message: "Temporary password sent to your email." });
+  } catch (err) {
+    res.status(500).json({ message: "Error processing request." });
+  }
+};

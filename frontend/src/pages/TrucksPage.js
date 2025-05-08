@@ -18,6 +18,9 @@ function TrucksPage() {
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
 
+  const [searchPlate, setSearchPlate] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
   const { user } = useAuth();
   const [form] = Form.useForm();
 
@@ -108,85 +111,122 @@ function TrucksPage() {
     }
   };
 
-  const columns = [
-    {
-      title: "Plate Number",
-      dataIndex: "plateNumber",
-      key: "plateNumber",
-    },
-    {
-      title: "Model",
-      dataIndex: "model",
-      key: "model",
-    },
-    {
-      title: "Capacity (tons)",
-      dataIndex: "capacity",
-      key: "capacity",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) =>
-        status === "available"
-          ? "Available"
-          : status === "inMaintenance"
-          ? "In Maintenance"
-          : status,
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, record) => (
-        <>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure to delete this truck?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </>
-      ),
-    },
-  ];
-
   return (
     <div style={{ padding: "24px" }}>
       <h2>Trucks Management</h2>
 
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        style={{ marginBottom: "16px" }}
-        onClick={() => {
-          setEditingTruck(null);
-          form.resetFields();
-          setIsModalOpen(true);
+      {/* 🔍 Filtres */}
+      <div
+        style={{
+          marginBottom: "16px",
+          display: "flex",
+          alignItems: "flex-end",
+          flexWrap: "wrap",
+          gap: "24px",
         }}
       >
-        Add Truck
-      </Button>
+        <div>
+          <label style={{ fontWeight: "500" }}>Search by plate</label>
+          <Input
+            placeholder="e.g. 123ABC"
+            value={searchPlate}
+            onChange={(e) => setSearchPlate(e.target.value)}
+            style={{ width: 200 }}
+          />
+        </div>
 
+        <div>
+          <label style={{ fontWeight: "500" }}>Filter by status</label>
+          <Select
+            placeholder="Select status"
+            value={filterStatus}
+            onChange={(value) => setFilterStatus(value)}
+            allowClear
+            style={{ width: 200 }}
+          >
+            <Option value="available">Available</Option>
+            <Option value="inMaintenance">In Maintenance</Option>
+          </Select>
+        </div>
+
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setEditingTruck(null);
+            form.resetFields();
+            setIsModalOpen(true);
+          }}
+        >
+          Add Truck
+        </Button>
+      </div>
+
+      {/* 📋 Tableau */}
       <Table
-        columns={columns}
-        dataSource={trucks}
+        columns={[
+          {
+            title: "Plate Number",
+            dataIndex: "plateNumber",
+            key: "plateNumber",
+          },
+          {
+            title: "Model",
+            dataIndex: "model",
+            key: "model",
+          },
+          {
+            title: "Capacity (tons)",
+            dataIndex: "capacity",
+            key: "capacity",
+          },
+          {
+            title: "Status",
+            dataIndex: "status",
+            key: "status",
+            render: (status) =>
+              status === "available"
+                ? "Available"
+                : status === "inMaintenance"
+                ? "In Maintenance"
+                : status,
+          },
+          {
+            title: "Actions",
+            key: "actions",
+            render: (_, record) => (
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEdit(record)}
+                />
+                <Popconfirm
+                  title="Are you sure to delete this truck?"
+                  onConfirm={() => handleDelete(record._id)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button type="text" danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </div>
+            ),
+          },
+        ]}
+        dataSource={trucks.filter((truck) => {
+          const plateMatch = truck.plateNumber
+            .toLowerCase()
+            .includes(searchPlate.toLowerCase());
+          const statusMatch = filterStatus
+            ? truck.status === filterStatus
+            : true;
+          return plateMatch && statusMatch;
+        })}
         loading={loading}
         rowKey="_id"
       />
 
-      {/* Modal Form for Add/Edit Truck */}
+      {/* ➕ / ✏️ Modal */}
       <Modal
         title={editingTruck ? "Edit Truck" : "Add Truck"}
         open={isModalOpen}
@@ -229,7 +269,7 @@ function TrucksPage() {
         </Form>
       </Modal>
 
-      {/* Snackbar Notifications */}
+      {/* ✅ Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

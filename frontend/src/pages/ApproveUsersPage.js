@@ -1,3 +1,4 @@
+// src/pages/ApproveUsersPage.js
 import { useEffect, useState } from "react";
 import { Card, Table, Button, message, Spin } from "antd";
 import axios from "axios";
@@ -13,30 +14,32 @@ function ApproveUsersPage() {
       const res = await axios.get("http://localhost:5000/api/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const pending = res.data.filter(
+      const pendingUsers = res.data.filter(
         (u) => !u.isApproved && u.role !== "manager"
       );
-      setUsers(pending);
+      setUsers(pendingUsers);
     } catch (error) {
-      message.error("Failed to load users");
+      console.error("Error fetching users:", error);
+      message.error("Failed to load pending users.");
     } finally {
       setLoading(false);
     }
   };
 
-  const approveUser = async (id) => {
+  const approveUser = async (userId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/users/${id}/approve`,
+        `http://localhost:5000/api/users/${userId}/approve`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      message.success("User approved!");
-      fetchUsers(); // Refresh list
+      message.success("User approved successfully!");
+      fetchUsers();
     } catch (error) {
-      message.error("Approval failed");
+      console.error("Approval error:", error);
+      message.error("Failed to approve user.");
     }
   };
 
@@ -46,7 +49,11 @@ function ApproveUsersPage() {
     }
   }, [user]);
 
-  if (loading) return <Spin style={{ display: "block", margin: "auto" }} />;
+  if (loading) {
+    return (
+      <Spin style={{ display: "block", margin: "80px auto" }} size="large" />
+    );
+  }
 
   if (user?.role !== "manager") {
     return (
@@ -55,11 +62,23 @@ function ApproveUsersPage() {
   }
 
   const columns = [
-    { title: "Name", dataIndex: "name" },
-    { title: "Email", dataIndex: "email" },
-    { title: "Role", dataIndex: "role" },
+    {
+      title: "Name",
+      dataIndex: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      render: (role) => role.charAt(0).toUpperCase() + role.slice(1),
+    },
     {
       title: "Action",
+      key: "action",
       render: (_, record) => (
         <Button type="primary" onClick={() => approveUser(record._id)}>
           Approve
@@ -75,7 +94,7 @@ function ApproveUsersPage() {
           columns={columns}
           dataSource={users}
           rowKey="_id"
-          pagination={false}
+          pagination={{ pageSize: 5 }}
         />
       </Card>
     </div>

@@ -88,6 +88,9 @@ function LoginPage() {
         <div style={{ textAlign: "center", marginTop: 10 }}>
           Don't have an account? <a href="/register">Register here</a>
         </div>
+        <div style={{ textAlign: "center", marginTop: 10 }}>
+          <a href="/forgot-password">Forgot Password?</a>
+        </div>
 
         <Snackbar
           open={snackbarOpen}

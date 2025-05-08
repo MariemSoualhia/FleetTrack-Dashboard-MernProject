@@ -19,7 +19,7 @@ import ReportsPage from "./pages/ReportsPage";
 import ReportsHistoryPage from "./pages/ReportsHistoryPage";
 import ProfilePage from "./pages/ProfilePage";
 import ApproveUsersPage from "./pages/ApproveUsersPage";
-
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 function App() {
   const { user, loading } = useAuth();
 
@@ -36,6 +36,7 @@ function App() {
           element={token ? <Navigate to="/dashboard" /> : <LoginPage />}
         />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Protected routes */}
         {token && (

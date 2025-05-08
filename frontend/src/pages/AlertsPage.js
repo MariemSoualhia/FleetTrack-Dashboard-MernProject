@@ -1,13 +1,14 @@
 // src/pages/AlertsPage.js
 import { useEffect, useState } from "react";
-import { Table, Button, Tag, Popconfirm, message } from "antd";
-import { CheckCircleOutlined } from "@ant-design/icons";
+import { Table, Button, Tag, Popconfirm, Select, Tooltip } from "antd";
+import { CheckCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { useAuth } from "../context/AuthContext";
 
 const Alert = MuiAlert;
+const { Option } = Select;
 
 function AlertsPage() {
   const [alerts, setAlerts] = useState([]);
@@ -15,6 +16,9 @@ function AlertsPage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
   const [alertMessage, setAlertMessage] = useState("");
+
+  const [filterType, setFilterType] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   const { user } = useAuth();
 
@@ -29,8 +33,6 @@ function AlertsPage() {
       const res = await axios.get("http://localhost:5000/api/alerts", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("Data fetched:", res.data); // ✅ va s'afficher
       setAlerts(res.data);
     } catch (error) {
       console.error(error);
@@ -40,7 +42,6 @@ function AlertsPage() {
   };
 
   useEffect(() => {
-    console.log("hiiiiiiiiiiiiiiiiiiiiiiiiiiii");
     fetchAlerts();
   }, []);
 
@@ -64,6 +65,13 @@ function AlertsPage() {
       setSnackbarOpen(true);
     }
   };
+
+  const filteredAlerts = alerts.filter((alert) => {
+    return (
+      (!filterType || alert.type === filterType) &&
+      (!filterStatus || alert.status === filterStatus)
+    );
+  });
 
   const columns = [
     {
@@ -118,9 +126,54 @@ function AlertsPage() {
     <div style={{ padding: "24px" }}>
       <h2>Alerts Management</h2>
 
+      <div
+        style={{ display: "flex", gap: 16, marginBottom: 16, flexWrap: "wrap" }}
+      >
+        <div>
+          <label style={{ fontSize: 12 }}>Type</label>
+          <Select
+            placeholder="Filter by Type"
+            style={{ width: 200 }}
+            allowClear
+            value={filterType}
+            onChange={setFilterType}
+          >
+            <Option value="fuelOverconsumption">Fuel Overconsumption</Option>
+            <Option value="excessiveDelay">Excessive Delay</Option>
+            <Option value="maintenanceNeeded">Maintenance Needed</Option>
+          </Select>
+        </div>
+
+        <div>
+          <label style={{ fontSize: 12 }}>Status</label>
+          <Select
+            placeholder="Filter by Status"
+            style={{ width: 200 }}
+            allowClear
+            value={filterStatus}
+            onChange={setFilterStatus}
+          >
+            <Option value="active">Active</Option>
+            <Option value="resolved">Resolved</Option>
+          </Select>
+        </div>
+
+        <Tooltip title="Reset Filters">
+          <Button
+            shape="circle"
+            icon={<ReloadOutlined />}
+            onClick={() => {
+              setFilterType("");
+              setFilterStatus("");
+            }}
+            style={{ marginTop: 22 }}
+          />
+        </Tooltip>
+      </div>
+
       <Table
         columns={columns}
-        dataSource={alerts}
+        dataSource={filteredAlerts}
         loading={loading}
         rowKey="_id"
       />

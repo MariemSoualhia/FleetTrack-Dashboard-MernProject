@@ -1,25 +1,34 @@
+// src/pages/ReportsHistoryPage.js
 import { useEffect, useState } from "react";
-import { Table, Button, Spin, Tag } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Button,
+  Spin,
+  Tag,
+  Form,
+  Select,
+  DatePicker,
+  Tooltip,
+} from "antd";
+import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { Form, Select, DatePicker } from "antd";
+
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 function ReportsHistoryPage() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
 
   const fetchReports = async (filters = {}) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-
       const res = await axios.get("http://localhost:5000/api/reports", {
         headers: { Authorization: `Bearer ${token}` },
         params: filters,
       });
-
       setReports(res.data);
     } catch (error) {
       console.error("Error loading reports:", error);
@@ -43,18 +52,23 @@ function ReportsHistoryPage() {
     fetchReports(filters);
   };
 
-  useEffect(() => {
+  const handleResetFilters = () => {
+    form.resetFields();
     fetchReports();
-  }, []);
+  };
 
   const downloadReport = (fileUrl) => {
     const link = document.createElement("a");
-    link.href = `/${fileUrl}`; // 📂 si ton fichier est sur serveur public ou uploadé
+    link.href = `/${fileUrl}`;
     link.download = fileUrl;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   const columns = [
     {
@@ -70,7 +84,13 @@ function ReportsHistoryPage() {
       render: (type) => (
         <Tag
           color={
-            type === "daily" ? "green" : type === "weekly" ? "blue" : "purple"
+            type === "daily"
+              ? "green"
+              : type === "weekly"
+              ? "blue"
+              : type === "alerts"
+              ? "volcano"
+              : "purple"
           }
         >
           {type.toUpperCase()}
@@ -94,19 +114,19 @@ function ReportsHistoryPage() {
       dataIndex: "fileUrl",
       key: "fileUrl",
     },
-    // {
-    //   title: "Actions",
-    //   key: "actions",
-    //   render: (_, record) => (
-    //     <Button
-    //       type="primary"
-    //       icon={<DownloadOutlined />}
-    //       onClick={() => downloadReport(record.fileUrl)}
-    //     >
-    //       Download
-    //     </Button>
-    //   ),
-    // },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Button
+          type="primary"
+          icon={<DownloadOutlined />}
+          onClick={() => downloadReport(record.fileUrl)}
+        >
+          Download
+        </Button>
+      ),
+    },
   ];
 
   if (loading) {
@@ -124,9 +144,19 @@ function ReportsHistoryPage() {
       >
         Reports History
       </h2>
-      <Form layout="inline" onFinish={handleFilter}>
+
+      <Form
+        form={form}
+        layout="inline"
+        onFinish={handleFilter}
+        style={{ marginBottom: 24, gap: 16, flexWrap: "wrap" }}
+      >
         <Form.Item name="type" label="Type">
-          <Select placeholder="Select report type" style={{ width: 180 }}>
+          <Select
+            placeholder="Select report type"
+            style={{ width: 180 }}
+            allowClear
+          >
             <Option value="trips">Trips</Option>
             <Option value="alerts">Alerts</Option>
             <Option value="daily">Daily</Option>
@@ -143,6 +173,12 @@ function ReportsHistoryPage() {
           <Button type="primary" htmlType="submit">
             Filter
           </Button>
+        </Form.Item>
+
+        <Form.Item>
+          <Tooltip title="Reset Filters">
+            <Button icon={<ReloadOutlined />} onClick={handleResetFilters} />
+          </Tooltip>
         </Form.Item>
       </Form>
 
