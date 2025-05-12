@@ -1,11 +1,10 @@
-// 🔁 Imports essentiels
+// TripsPage.jsx
 import { useEffect, useState } from "react";
 import {
   Table,
   Button,
   Modal,
   Form,
-  Input,
   Select,
   DatePicker,
   Popconfirm,
@@ -21,10 +20,11 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import dayjs from "dayjs";
-import TripMapModal from "./TripMapModal"; // 📌 Import custom map component
+import AddressAutoComplete from "../components/AddressAutoComplete";
 
 const { Option } = Select;
 const Alert = MuiAlert;
@@ -41,17 +41,12 @@ function TripsPage() {
   const [alertMessage, setAlertMessage] = useState("");
   const [form] = Form.useForm();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [filterDriver, setFilterDriver] = useState("");
   const [filterTruck, setFilterTruck] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterStartLocation, setFilterStartLocation] = useState("");
-
-  const [isMapVisible, setIsMapVisible] = useState(false);
-  const [selectedTripCoords, setSelectedTripCoords] = useState({
-    start: null,
-    end: null,
-  });
 
   const handleCloseSnackbar = () => setSnackbarOpen(false);
 
@@ -136,6 +131,8 @@ function TripsPage() {
     setEditingTrip(trip);
     form.setFieldsValue({
       ...trip,
+      driverId: trip.driverId?._id,
+      truckId: trip.truckId?._id,
       startTime: dayjs(trip.startTime),
       endTime: dayjs(trip.endTime),
     });
@@ -159,17 +156,6 @@ function TripsPage() {
     }
   };
 
-  const geocode = async (place) => {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        place
-      )}`
-    );
-    const data = await res.json();
-    if (data.length === 0) throw new Error("Location not found");
-    return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-  };
-
   const filteredTrips = trips.filter((trip) => {
     return (
       (!filterDriver || trip.driverId?.name === filterDriver) &&
@@ -187,98 +173,73 @@ function TripsPage() {
       <h2>Trips Management</h2>
 
       <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 16,
-          marginBottom: 16,
-          alignItems: "flex-end",
-        }}
+        style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 16 }}
       >
-        <div>
-          <label style={{ display: "block", marginBottom: 4 }}>Driver</label>
-          <Select
-            placeholder="Select Driver"
-            style={{ width: 180 }}
-            allowClear
-            value={filterDriver}
-            onChange={setFilterDriver}
-          >
-            {drivers.map((d) => (
-              <Option key={d._id} value={d.name}>
-                {d.name}
-              </Option>
-            ))}
-          </Select>
-        </div>
+        <Select
+          placeholder="Driver"
+          style={{ width: 180 }}
+          value={filterDriver}
+          onChange={setFilterDriver}
+          allowClear
+        >
+          {drivers.map((d) => (
+            <Option key={d._id} value={d.name}>
+              {d.name}
+            </Option>
+          ))}
+        </Select>
 
-        <div>
-          <label style={{ display: "block", marginBottom: 4 }}>Truck</label>
-          <Select
-            placeholder="Select Truck"
-            style={{ width: 180 }}
-            allowClear
-            value={filterTruck}
-            onChange={setFilterTruck}
-          >
-            {trucks.map((t) => (
-              <Option key={t._id} value={t.plateNumber}>
-                {t.plateNumber}
-              </Option>
-            ))}
-          </Select>
-        </div>
+        <Select
+          placeholder="Truck"
+          style={{ width: 180 }}
+          value={filterTruck}
+          onChange={setFilterTruck}
+          allowClear
+        >
+          {trucks.map((t) => (
+            <Option key={t._id} value={t.plateNumber}>
+              {t.plateNumber}
+            </Option>
+          ))}
+        </Select>
 
-        <div>
-          <label style={{ display: "block", marginBottom: 4 }}>Status</label>
-          <Select
-            placeholder="Select Status"
-            style={{ width: 180 }}
-            allowClear
-            value={filterStatus}
-            onChange={setFilterStatus}
-          >
-            <Option value="on-time">On-Time</Option>
-            <Option value="delayed">Delayed</Option>
-          </Select>
-        </div>
+        <Select
+          placeholder="Status"
+          style={{ width: 180 }}
+          value={filterStatus}
+          onChange={setFilterStatus}
+          allowClear
+        >
+          <Option value="on-time">On-Time</Option>
+          <Option value="delayed">Delayed</Option>
+        </Select>
 
-        <div>
-          <label style={{ display: "block", marginBottom: 4 }}>
-            Start Location
-          </label>
-          <Input
-            placeholder="Enter Start Location"
-            style={{ width: 180 }}
-            value={filterStartLocation}
-            onChange={(e) => setFilterStartLocation(e.target.value)}
-          />
-        </div>
+        <AddressAutoComplete
+          value={filterStartLocation}
+          onChange={setFilterStartLocation}
+          placeholder="Start Location Filter"
+        />
 
-        <div>
-          <Tooltip title="Reset Filters">
-            <Button
-              shape="circle"
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setFilterDriver("");
-                setFilterTruck("");
-                setFilterStatus("");
-                setFilterStartLocation("");
-              }}
-            />
-          </Tooltip>
-        </div>
-
-        <div>
+        <Tooltip title="Reset Filters">
           <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add Trip
-          </Button>
-        </div>
+            shape="circle"
+            icon={<ReloadOutlined />}
+            onClick={() => {
+              setFilterDriver("");
+              setFilterTruck("");
+              setFilterStatus("");
+              setFilterStartLocation("");
+            }}
+          />
+        </Tooltip>
+
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setIsModalOpen(true)}
+        >
+          Add Trip
+        </Button>
       </div>
 
       <Table
@@ -305,13 +266,13 @@ function TripsPage() {
               <Button
                 type="text"
                 icon={<EyeOutlined />}
-                onClick={async () => {
-                  setSelectedTripCoords({
-                    start: r.startLocation,
-                    end: r.endLocation,
-                  });
-                  setIsMapVisible(true);
-                }}
+                onClick={() =>
+                  navigate(
+                    `/trip-map?start=${encodeURIComponent(
+                      r.startLocation
+                    )}&end=${encodeURIComponent(r.endLocation)}`
+                  )
+                }
               />
             ),
           },
@@ -339,25 +300,101 @@ function TripsPage() {
         loading={loading}
       />
 
-      {/* 🗺️ Modal Carte */}
       <Modal
-        open={isMapVisible}
-        onCancel={() => setIsMapVisible(false)}
-        footer={null}
-        title="Trip Route Map"
-        width={800}
+        open={isModalOpen}
+        title={editingTrip ? "Edit Trip" : "Add Trip"}
+        onCancel={() => {
+          setEditingTrip(null);
+          setIsModalOpen(false);
+        }}
+        onOk={() => form.submit()}
       >
-        <div style={{ height: 500 }}>
-          {selectedTripCoords.start && selectedTripCoords.end && (
-            <TripMapModal
-              startLocation={selectedTripCoords.start}
-              endLocation={selectedTripCoords.end}
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <Form.Item
+            name="driverId"
+            label="Driver"
+            rules={[{ required: true }]}
+          >
+            <Select placeholder="Select Driver">
+              {drivers.map((d) => (
+                <Option key={d._id} value={d._id}>
+                  {d.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="truckId" label="Truck" rules={[{ required: true }]}>
+            <Select placeholder="Select Truck">
+              {trucks.map((t) => (
+                <Option key={t._id} value={t._id}>
+                  {t.plateNumber}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="startLocation"
+            label="Start Address"
+            rules={[{ required: true }]}
+          >
+            <AddressAutoComplete
+              value={form.getFieldValue("startLocation")}
+              onChange={(val) => form.setFieldValue("startLocation", val)}
+              placeholder="Type an address (e.g. 10 rue...)"
             />
-          )}
-        </div>
+          </Form.Item>
+
+          <Form.Item
+            name="endLocation"
+            label="End Address"
+            rules={[{ required: true }]}
+          >
+            <AddressAutoComplete
+              value={form.getFieldValue("endLocation")}
+              onChange={(val) => form.setFieldValue("endLocation", val)}
+              placeholder="Type an address (e.g. 1 avenue...)"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="startTime"
+            label="Start Time"
+            rules={[{ required: true }]}
+          >
+            <DatePicker showTime style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item
+            name="endTime"
+            label="End Time"
+            rules={[{ required: true }]}
+          >
+            <DatePicker showTime style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item name="distanceDriven" label="Distance (km)">
+            <InputNumber min={0} style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item name="fuelUsed" label="Fuel Used (L)">
+            <InputNumber min={0} style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item name="deliveryStatus" label="Status">
+            <Select>
+              <Option value="on-time">On-Time</Option>
+              <Option value="delayed">Delayed</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="delayReason" label="Delay Reason">
+            <InputNumber style={{ width: "100%" }} />
+          </Form.Item>
+        </Form>
       </Modal>
 
-      {/* ✅ Notifications */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

@@ -20,6 +20,7 @@ import ReportsHistoryPage from "./pages/ReportsHistoryPage";
 import ProfilePage from "./pages/ProfilePage";
 import ApproveUsersPage from "./pages/ApproveUsersPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import TripMapPage from "./pages/TripMapPage";
 function App() {
   const { user, loading } = useAuth();
 
@@ -52,6 +53,7 @@ function App() {
             <Route path="/reports-history" element={<ReportsHistoryPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin/users" element={<ApproveUsersPage />} />
+            <Route path="/trip-map" element={<TripMapPage />} />
 
             {/* autres routes */}
           </Route>
