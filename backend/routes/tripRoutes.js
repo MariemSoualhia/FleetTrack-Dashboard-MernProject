@@ -31,5 +31,11 @@ router.get(
   authorizeRoles("manager", "supervisor"),
   tripController.getTripsPerDay
 );
+router.post(
+  "/estimate",
+  protect,
+  authorizeRoles("manager", "logisticsOperator"),
+  tripController.estimateTrip
+);
 
 module.exports = router;

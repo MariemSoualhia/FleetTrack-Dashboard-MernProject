@@ -89,3 +89,31 @@ exports.getTripsPerDay = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+exports.estimateTrip = async (req, res) => {
+  try {
+    const { startLocation, endLocation, truckId } = req.body;
+
+    // Basic simulation: avg distance & fuel from past similar trips
+    const similarTrips = await Trip.find({
+      startLocation,
+      endLocation,
+      truckId,
+    });
+
+    if (similarTrips.length === 0) {
+      return res.status(404).json({ message: "No similar trip found." });
+    }
+
+    const avgDistance =
+      similarTrips.reduce((acc, t) => acc + t.distanceDriven, 0) /
+      similarTrips.length;
+
+    const avgFuel =
+      similarTrips.reduce((acc, t) => acc + t.fuelUsed, 0) /
+      similarTrips.length;
+
+    res.json({ estimatedDistance: avgDistance, estimatedFuel: avgFuel });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

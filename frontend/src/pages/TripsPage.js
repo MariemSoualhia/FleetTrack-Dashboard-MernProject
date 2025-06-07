@@ -392,6 +392,41 @@ function TripsPage() {
           <Form.Item name="delayReason" label="Delay Reason">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
+
+          {/* ⬇️ ADD THIS BUTTON HERE */}
+          <Button
+            type="dashed"
+            block
+            onClick={async () => {
+              const values = form.getFieldsValue();
+              const { startLocation, endLocation, truckId } = values;
+              if (!startLocation || !endLocation || !truckId) {
+                return alert(
+                  "Please fill in start location, end location, and truck."
+                );
+              }
+              try {
+                const { data } = await axios.post(
+                  "http://localhost:5000/api/trips/estimate",
+                  { startLocation, endLocation, truckId },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                  }
+                );
+                alert(
+                  `Estimated Distance: ${data.estimatedDistance.toFixed(
+                    1
+                  )} km\nEstimated Fuel: ${data.estimatedFuel.toFixed(1)} L`
+                );
+              } catch (e) {
+                alert("No estimation available for this trip.");
+              }
+            }}
+          >
+            Estimate Fuel & Distance
+          </Button>
         </Form>
       </Modal>
 
