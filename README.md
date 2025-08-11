@@ -55,9 +55,6 @@ Built using the **MERN Stack** (**MongoDB**, **Express.js**, **React**, **Node.j
 - **🔔 Real-Time Notifications**  
   Instant updates for alerts, trips, and approvals.
 
-- **💬 Internal Messaging**  
-  Chat between managers, supervisors, and drivers via Socket.io.
-
 ## 📸 Screenshots
 
 ### Login
