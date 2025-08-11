@@ -52,9 +52,6 @@ Built using the **MERN Stack** (**MongoDB**, **Express.js**, **React**, **Node.j
 - **📝 User Approval System**  
   Managers can approve or reject new user accounts.
 
-- **🔔 Real-Time Notifications**  
-  Instant updates for alerts, trips, and approvals.
-
 ## 📸 Screenshots
 
 ### Login
